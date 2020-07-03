@@ -10,5 +10,8 @@ namespace BaseBotLib.Services.Bot.Contracts
 
         [DataMember(Name = "one_time_keyboard")]
         public bool OneTime { get; set; }
+
+        [DataMember(Name = "resize_keyboard")]
+        public bool ResizeKeyboard { get; set; }
     }
 }

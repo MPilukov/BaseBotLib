@@ -118,18 +118,12 @@ namespace BaseBotLib.Services.Bot
                 return Task.FromResult(0);
             }
 
-            var data = new KeyboardButton[][]
-            {
-                texts.Select(x =>
-                new KeyboardButton
-                {
-                    Text = x,
-                }).ToArray(),
-            };
+            var data = GetButtons(texts);
 
             var body = new CreateKeyboardRequest
             {
                 OneTime = true,
+                ResizeKeyboard = true,
                 Buttons = data,
             };
 
@@ -141,7 +135,45 @@ namespace BaseBotLib.Services.Bot
             return PostInternal(url, new Dictionary<string, string>());
         }
 
-        private InlineButton[][] GetButtons(string[] texts)
+        private KeyboardButton[][] GetButtons(string[] texts)
+        {
+            var response = new List<KeyboardButton[]>();
+
+            var count = 0;
+            while (count < texts.Length)
+            {
+                if (texts.Length - count == 1)
+                {
+                    response.Add(new KeyboardButton[] {
+                        new KeyboardButton
+                        {
+                            Text = texts[count],
+                        }
+                    });
+
+                    count += 1;
+                }
+                else
+                {
+                    response.Add(new KeyboardButton[] {
+                        new KeyboardButton
+                        {
+                            Text = texts[count],
+                        },
+                        new KeyboardButton
+                        {
+                            Text = texts[count + 1],
+                        },
+                    });
+
+                    count += 2;
+                };
+            }
+
+            return response.ToArray();
+        }
+
+        private InlineButton[][] GetInlineButtons(string[] texts)
         {
             var response = new List<InlineButton[]>();
 
@@ -189,7 +221,7 @@ namespace BaseBotLib.Services.Bot
                 return Task.FromResult(0);
             }
 
-            var data = GetButtons(texts);
+            var data = GetInlineButtons(texts);
 
             var body = new CreateInlineKeyboardRequest
             {
