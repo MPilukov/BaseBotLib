@@ -340,14 +340,14 @@ namespace BaseBotLib.Services.Bot
 
             return new Message
             {
-                Id = messageData.Info?.MessageId ?? messageData.CallbackQuery.Info.MessageId,
-                Text = messageData.Info?.Text ?? messageData.CallbackQuery.Data,
+                Id = messageData.Info?.MessageId ?? messageData.CallbackQuery?.Info?.MessageId ?? -1,
+                Text = messageData.Info?.Text ?? messageData.CallbackQuery?.Data,
                 RequestText = messageData.CallbackQuery?.Info?.Text,
-                FirstName = messageData.Info?.UserData?.FirstName ?? messageData.CallbackQuery.UserData.FirstName,
-                LastName = messageData.Info?.UserData?.LastName ?? messageData.CallbackQuery.UserData.LastName,
-                UserId = messageData.Info?.UserData?.Id ?? messageData.CallbackQuery.UserData.Id,
-                UserName = messageData.Info?.UserData.UserName ?? messageData.CallbackQuery.UserData.UserName,
-                ChatId = messageData.Info?.ChatData?.Id ?? messageData.CallbackQuery.Info.ChatData.Id,
+                FirstName = messageData.Info?.UserData?.FirstName ?? messageData.CallbackQuery?.UserData?.FirstName,
+                LastName = messageData.Info?.UserData?.LastName ?? messageData.CallbackQuery?.UserData?.LastName,
+                UserId = messageData.Info?.UserData?.Id ?? messageData.CallbackQuery?.UserData?.Id ?? -1,
+                UserName = messageData.Info?.UserData.UserName ?? messageData.CallbackQuery?.UserData?.UserName,
+                ChatId = messageData.Info?.ChatData?.Id ?? messageData.CallbackQuery?.Info?.ChatData?.Id ?? -1,
             };
         }
     }
