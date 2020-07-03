@@ -17,6 +17,9 @@ namespace BaseBotLib.Services.Bot.Contracts
 
         [DataMember(Name = "update_id")]
         public int UpdateId { get; set; }
+
+        [DataMember(Name = "callback_query")]
+        public CallbackQuery CallbackQuery { get; set; }
     }
 
     [DataContract]
@@ -36,5 +39,18 @@ namespace BaseBotLib.Services.Bot.Contracts
         
         [DataMember(Name = "chat")]
         public ChatInfo ChatData { get; set; }
+    }
+
+    [DataContract]
+    public class CallbackQuery
+    {
+        [DataMember(Name = "data")]
+        public string Data { get; set; }
+
+        [DataMember(Name = "from")]
+        public UserInfo UserData { get; set; }
+
+        [DataMember(Name = "message")]
+        public MessageInfo Info { get; set; }
     }
 }

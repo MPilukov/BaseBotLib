@@ -7,6 +7,7 @@ namespace BaseBotLib.Interfaces.Bot
         Task<string> GetBotName();
         Task<Message[]> GetNewMessages();
         Task SendMessage(string chatId, string text);
-        Task AnswerCallbackQuery(string id, string text, int cacheTime, bool showAlert);
+        Task CreateKeyboard(string chatId, string text, string[] texts);
+        Task CreateInlineKeyboard(string chatId, string text, string[] texts);
     }
 }

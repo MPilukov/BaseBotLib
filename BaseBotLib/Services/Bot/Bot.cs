@@ -47,7 +47,7 @@ namespace BaseBotLib.Services.Bot
 
             if (!string.IsNullOrWhiteSpace(botName))
             {
-                Logger.Info($"Запущен бот - {botName}.");
+                Logger?.Info($"Запущен бот - {botName}.");
             }
         }
 
@@ -62,7 +62,7 @@ namespace BaseBotLib.Services.Bot
                 return response.BotInfo?.FirstName;
             }
 
-            Logger.Warn($"При получении информации о боте ({Id}) получили ошибку : {response.ErrorDescription}.");
+            Logger?.Warn($"При получении информации о боте ({Id}) получили ошибку : {response.ErrorDescription}.");
             return null;
         }
 
@@ -88,7 +88,7 @@ namespace BaseBotLib.Services.Bot
                 }
                 else
                 {
-                    Logger.Warn($"При получении списка сообщений сервер вернул ошибку : {response.ErrorDescription}.");
+                    Logger?.Warn($"При получении списка сообщений сервер вернул ошибку : {response.ErrorDescription}.");
                 }
             }
             catch (Exception exp)
@@ -111,21 +111,101 @@ namespace BaseBotLib.Services.Bot
                 Logger?.Warn($"Ошибка при отправке сообщения клиенту : {text} / {chatId} : {exp.ToString()}.");
             }
         }
-
-        public Task AnswerCallbackQuery(string id, string text, int cacheTime, bool showAlert)
+        public Task CreateKeyboard(string chatId, string text, string[] texts)
         {
-            var url = $"{Url}/answerCallbackQuery";
-
-            var request = new AnswerCallbackQueryRequest()
+            if (texts.Length == 0)
             {
-                Id = id,
-                Text = text,
-                CacheTime = cacheTime,
-                ShowAlert = showAlert,
+                return Task.FromResult(0);
+            }
+
+            var data = new KeyboardButton[][]
+            {
+                texts.Select(x =>
+                new KeyboardButton
+                {
+                    Text = x,
+                }).ToArray(),
             };
 
-            return PostInternal(url, request, new Dictionary<string, string>());
+            var body = new CreateKeyboardRequest
+            {
+                OneTime = true,
+                Buttons = data,
+            };
+
+            var bodyString = JsonConvert.SerializeObject(body);
+
+            var url = $"{Url}/sendMessage?chat_id={chatId}&text={HttpUtility.UrlEncode(text)}" +
+                $"&reply_markup={HttpUtility.UrlEncode(bodyString)}";
+
+            return PostInternal(url, new Dictionary<string, string>());
         }
+
+        private InlineButton[][] GetButtons(string[] texts)
+        {
+            var response = new List<InlineButton[]>();
+
+            var count = 0;
+            while (count < texts.Length)
+            {
+                if (texts.Length - count == 1)
+                {
+                    response.Add(new InlineButton[] {
+                        new InlineButton
+                        {
+                            Text = texts[count],
+                            CallbackData = texts[count],
+                        }
+                    });
+
+                    count += 1;
+                }
+                else
+                {
+                    response.Add(new InlineButton[] {
+                        new InlineButton
+                        {
+                            Text = texts[count],
+                            CallbackData = texts[count],
+                        },
+                        new InlineButton
+                        {
+                            Text = texts[count + 1],
+                            CallbackData = texts[count + 1],
+                        },
+                    });
+
+                    count += 2;
+                };
+            }
+
+            return response.ToArray();
+        }
+
+        public Task CreateInlineKeyboard(string chatId, string text, string[] texts)
+        {
+            if (texts.Length == 0)
+            {
+                return Task.FromResult(0);
+            }
+
+            var data = GetButtons(texts);
+
+            var body = new CreateInlineKeyboardRequest
+            {
+                OneTime = true,
+                ResizeKeyboard = true,
+                InlineButtons = data,
+            };
+
+            var bodyString = JsonConvert.SerializeObject(body);
+
+            var url = $"{Url}/sendMessage?chat_id={chatId}&text={HttpUtility.UrlEncode(text)}" +
+                $"&reply_markup={HttpUtility.UrlEncode(bodyString)}";
+
+            return PostInternal(url, new Dictionary<string, string>());
+        }
+
         private async Task PostInternal(string url, Dictionary<string, string> headers)
         {
             var content = new StringContent(string.Empty);
@@ -208,33 +288,34 @@ namespace BaseBotLib.Services.Bot
                 return null;
             }
 
-            if (messageData.Info == null)
+            if (messageData.Info == null && messageData.CallbackQuery == null)
             {
                 Logger.Warn("Информация о сообщении пуста.");
                 return null;
             }
 
-            if (messageData.Info.UserData == null)
+            if (messageData.Info?.UserData == null && messageData.CallbackQuery?.UserData == null)
             {
                 Logger.Warn("Информация о пользователе пуста.");
                 return null;
             }
 
-            if (messageData.Info.ChatData == null)
+            if (messageData.Info?.ChatData == null && messageData.CallbackQuery?.Info?.ChatData == null)
             {
                 Logger.Warn("Информация о чате пуста.");
                 return null;
             }
 
-            return new Message()
+            return new Message
             {
-                Id = messageData.Info.MessageId,
-                Text = messageData.Info.Text,
-                FirstName = messageData.Info.UserData.FirstName,
-                LastName = messageData.Info.UserData.LastName,
-                UserId = messageData.Info.UserData.Id,
-                UserName = messageData.Info.UserData.UserName,
-                ChatId = messageData.Info.ChatData.Id,
+                Id = messageData.Info?.MessageId ?? messageData.CallbackQuery.Info.MessageId,
+                Text = messageData.Info?.Text ?? messageData.CallbackQuery.Data,
+                RequestText = messageData.CallbackQuery?.Info?.Text,
+                FirstName = messageData.Info?.UserData?.FirstName ?? messageData.CallbackQuery.UserData.FirstName,
+                LastName = messageData.Info?.UserData?.LastName ?? messageData.CallbackQuery.UserData.LastName,
+                UserId = messageData.Info?.UserData?.Id ?? messageData.CallbackQuery.UserData.Id,
+                UserName = messageData.Info?.UserData.UserName ?? messageData.CallbackQuery.UserData.UserName,
+                ChatId = messageData.Info?.ChatData?.Id ?? messageData.CallbackQuery.Info.ChatData.Id,
             };
         }
     }
