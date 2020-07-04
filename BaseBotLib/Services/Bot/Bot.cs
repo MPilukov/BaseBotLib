@@ -111,7 +111,23 @@ namespace BaseBotLib.Services.Bot
                 Logger?.Warn($"Ошибка при отправке сообщения клиенту : {text} / {chatId} : {exp.ToString()}.");
             }
         }
+
         public Task CreateKeyboard(string chatId, string text, string[] texts)
+        {
+            return CreateKeyboardInternal(chatId, text, texts, true, true);
+        }
+
+        public Task CreateKeyboard(string chatId, string text, string[] texts, bool oneTime)
+        {
+            return CreateKeyboardInternal(chatId, text, texts, oneTime, true);
+        }
+
+        public Task CreateKeyboard(string chatId, string text, string[] texts, bool oneTime, bool resizeKeyboard)
+        {
+            return CreateKeyboardInternal(chatId, text, texts, oneTime, resizeKeyboard);
+        }
+
+        private Task CreateKeyboardInternal(string chatId, string text, string[] texts, bool oneTime, bool resizeKeyboard)
         {
             if (texts.Length == 0)
             {
@@ -122,8 +138,8 @@ namespace BaseBotLib.Services.Bot
 
             var body = new CreateKeyboardRequest
             {
-                OneTime = true,
-                ResizeKeyboard = true,
+                OneTime = oneTime,
+                ResizeKeyboard = resizeKeyboard,
                 Buttons = data,
             };
 
@@ -216,6 +232,21 @@ namespace BaseBotLib.Services.Bot
 
         public Task CreateInlineKeyboard(string chatId, string text, string[] texts)
         {
+            return CreateInlineKeyboardInternal(chatId, text, texts, true, true);
+        }
+
+        public Task CreateInlineKeyboard(string chatId, string text, string[] texts, bool oneTime)
+        {
+            return CreateInlineKeyboardInternal(chatId, text, texts, oneTime, true);
+        }
+
+        public Task CreateInlineKeyboard(string chatId, string text, string[] texts, bool oneTime, bool resizeKeyboard)
+        {
+            return CreateInlineKeyboardInternal(chatId, text, texts, oneTime, resizeKeyboard);
+        }
+
+        private Task CreateInlineKeyboardInternal(string chatId, string text, string[] texts, bool oneTime, bool resizeKeyboard)
+        {
             if (texts.Length == 0)
             {
                 return Task.FromResult(0);
@@ -225,8 +256,8 @@ namespace BaseBotLib.Services.Bot
 
             var body = new CreateInlineKeyboardRequest
             {
-                OneTime = true,
-                ResizeKeyboard = true,
+                OneTime = oneTime,
+                ResizeKeyboard = resizeKeyboard,
                 InlineButtons = data,
             };
 
