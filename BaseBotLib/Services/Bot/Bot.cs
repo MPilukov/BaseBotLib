@@ -38,10 +38,20 @@ namespace BaseBotLib.Services.Bot
             Init();
         }
 
+        public Bot(string id, string token)
+        {
+            Id = id;
+            Url = $"https://api.telegram.org/bot{Id}:{token}";
+
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+
+            Init();
+        }
+
         private void Init()
         {
-            LimitSelect = Convert.ToInt32(Storage.GetValue(_limitSelectName).Result ?? "20");
-            LastMessageIdx = Convert.ToInt32(Storage.GetValue(_lastMessageIdxName).Result ?? "0");
+            LimitSelect = Storage == null ? 20 : Convert.ToInt32(Storage.GetValue(_limitSelectName).Result ?? "20");
+            LastMessageIdx = Storage == null ? 0 : Convert.ToInt32(Storage.GetValue(_lastMessageIdxName).Result ?? "0");
 
             var botName = GetBotName().Result;
 
@@ -83,7 +93,10 @@ namespace BaseBotLib.Services.Bot
                     if (response.Result.Any())
                     {
                         LastMessageIdx = response.Result.Max(x => x.UpdateId) + 1;
-                        Storage.SetValue(_lastMessageIdxName, LastMessageIdx.ToString()).Wait();
+                        if (Storage != null)
+                        {
+                            await Storage.SetValue(_lastMessageIdxName, LastMessageIdx.ToString());
+                        }
                     }
                 }
                 else
@@ -347,25 +360,25 @@ namespace BaseBotLib.Services.Bot
         {
             if (messageData == null)
             {
-                Logger.Warn("Cообщение пусто.");
+                Logger?.Warn("Cообщение пусто.");
                 return null;
             }
 
             if (messageData.Info == null && messageData.CallbackQuery == null)
             {
-                Logger.Warn("Информация о сообщении пуста.");
+                Logger?.Warn("Информация о сообщении пуста.");
                 return null;
             }
 
             if (messageData.Info?.UserData == null && messageData.CallbackQuery?.UserData == null)
             {
-                Logger.Warn("Информация о пользователе пуста.");
+                Logger?.Warn("Информация о пользователе пуста.");
                 return null;
             }
 
             if (messageData.Info?.ChatData == null && messageData.CallbackQuery?.Info?.ChatData == null)
             {
-                Logger.Warn("Информация о чате пуста.");
+                Logger?.Warn("Информация о чате пуста.");
                 return null;
             }
 

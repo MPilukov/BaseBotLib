@@ -7,11 +7,11 @@ namespace BaseBotLib.Interfaces.Bot
         Task<string> GetBotName();
         Task<Message[]> GetNewMessages();
         Task SendMessage(string chatId, string text);
-        Task CreateKeyboard(string chatId, string text, string[] texts);
-        Task CreateKeyboard(string chatId, string text, string[] texts, bool oneTime);
-        Task CreateKeyboard(string chatId, string text, string[] texts, bool oneTime, bool resizeKeyboard);
-        Task CreateInlineKeyboard(string chatId, string text, string[] texts);
-        Task CreateInlineKeyboard(string chatId, string text, string[] texts, bool oneTime);
-        Task CreateInlineKeyboard(string chatId, string text, string[] texts, bool oneTime, bool resizeKeyboard);
+        Task CreateKeyboard(string chatId, string textMenu, string[] textButtons);
+        Task CreateKeyboard(string chatId, string textMenu, string[] textButtons, bool oneTime);
+        Task CreateKeyboard(string chatId, string textMenu, string[] textButtons, bool oneTime, bool resizeKeyboard);
+        Task CreateInlineKeyboard(string chatId, string textMenu, string[] textButtons);
+        Task CreateInlineKeyboard(string chatId, string textMenu, string[] textButtons, bool oneTime);
+        Task CreateInlineKeyboard(string chatId, string textMenu, string[] textButtons, bool oneTime, bool resizeKeyboard);
     }
 }
