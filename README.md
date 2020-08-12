@@ -15,6 +15,8 @@ Easy way to create telegram-bot :
            _logger.Info($"New message : \"{newMessage.Text}\" from user \"{newMessage.UserName}\".");
            await ProcessMessage(newMessage);
        }
+       
+       await Task.Delay(20);
     }
   
 Function-handler for message can have view :
