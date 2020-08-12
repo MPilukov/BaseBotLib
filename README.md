@@ -19,7 +19,7 @@ Easy way to create telegram-bot :
         await Task.Delay(20);
     }
   
-Function-handler for message can have view :
+Function-handler for the message can have such a view :
   
     private async Task ProcessMessage(IBot bot, Message message)
     {
