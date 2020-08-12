@@ -21,7 +21,7 @@ Easy way to create telegram-bot :
   
 Function-handler for message can have view :
   
-    private static async Task ProcessMessage(IBot bot, Message message)
+    private async Task ProcessMessage(IBot bot, Message message)
     {
         var msg = message.Text?.ToLower();
 
