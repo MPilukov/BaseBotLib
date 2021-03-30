@@ -10,5 +10,6 @@
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public int ChatId { get; set; }
+        public string FileId { get; set; }
     }
 }

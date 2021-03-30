@@ -39,6 +39,12 @@ namespace BaseBotLib.Services.Bot.Contracts
         
         [DataMember(Name = "chat")]
         public ChatInfo ChatData { get; set; }
+
+        [DataMember(Name = "document")]
+        public DocumentInfo DocumentData { get; set; }
+
+        [DataMember(Name = "photo")]
+        public DocumentInfo[] Photos { get; set; }
     }
 
     [DataContract]

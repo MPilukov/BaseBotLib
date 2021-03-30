@@ -18,6 +18,7 @@ namespace BaseBotLib.Services.Bot
     {
         private string Id { get; }
         private string Url { get; }
+        private string FileUrl { get; }
         private ILogger Logger { get; }
         private IStorage Storage { get; }
 
@@ -30,6 +31,7 @@ namespace BaseBotLib.Services.Bot
         {
             Id = id;
             Url = $"https://api.telegram.org/bot{Id}:{token}";
+            FileUrl = $"https://api.telegram.org/file/bot{Id}:{token}";
             Logger = logger;
             Storage = storage;
 
@@ -392,7 +394,40 @@ namespace BaseBotLib.Services.Bot
                 UserId = messageData.Info?.UserData?.Id ?? messageData.CallbackQuery?.UserData?.Id ?? -1,
                 UserName = messageData.Info?.UserData.UserName ?? messageData.CallbackQuery?.UserData?.UserName,
                 ChatId = messageData.Info?.ChatData?.Id ?? messageData.CallbackQuery?.Info?.ChatData?.Id ?? -1,
+                FileId = messageData.Info?.DocumentData?.FileId ?? messageData.Info?.Photos?.FirstOrDefault()?.FileId,
             };
+        }
+
+        public async Task<byte[]> GetFile(string fileId)
+        {
+            var getFileByIdUrl = $"{Url}/getFile?file_id={fileId}";
+            var getFileResponse = await GetInternal<GetFileResponse>(getFileByIdUrl);
+
+            if (getFileResponse.IsSuccess)
+            {
+                var filePath = getFileResponse.Result.FilePath;
+
+                var getFileUrl = $"{FileUrl}/{filePath}";
+
+                try
+                {
+                    using (var client = new WebClient())
+                    {
+                        byte[] bytes = client.DownloadData(new Uri(getFileUrl));
+                        return bytes;
+                    }
+                }
+                catch (Exception exc)
+                {
+                    Logger.Warn($"При получении файла ({filePath}) " +
+                       $"получили ошибку : {exc.Message}.");
+                    return null;
+                }
+            }
+
+            Logger.Warn($"При получении информации о файде ({fileId}) " +
+                $"получили ошибку : {getFileResponse.ErrorDescription}.");
+            return null;
         }
     }
 }

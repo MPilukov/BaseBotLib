@@ -13,5 +13,6 @@ namespace BaseBotLib.Interfaces.Bot
         Task CreateInlineKeyboard(string chatId, string textMenu, string[] textButtons);
         Task CreateInlineKeyboard(string chatId, string textMenu, string[] textButtons, bool oneTime);
         Task CreateInlineKeyboard(string chatId, string textMenu, string[] textButtons, bool oneTime, bool resizeKeyboard);
+        Task<byte[]> GetFile(string fileId);
     }
 }
