@@ -11,5 +11,11 @@
         public string LastName { get; set; }
         public int ChatId { get; set; }
         public string FileId { get; set; }
+
+        public Document Document { get; set; }
+
+        public Photo[] Photos { get; set; }
+
+        public Voice Voice { get; set; }
     }
 }

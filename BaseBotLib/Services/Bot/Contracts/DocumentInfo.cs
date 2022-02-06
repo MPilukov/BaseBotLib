@@ -3,11 +3,10 @@
 namespace BaseBotLib.Services.Bot.Contracts
 {
     [DataContract]
-    public class DocumentInfo
+    public class DocumentInfo : FileInfo
     {
-
-        [DataMember(Name = "file_id")]
-        public string FileId { get; set; }
+        [DataMember(Name = "file_name")]
+        public string FileName { get; set; }
 
         [DataMember(Name = "mime_type")]
         public string MimeType { get; set; }
