@@ -358,7 +358,7 @@ namespace BaseBotLib.Services.Bot
                 return JsonConvert.DeserializeObject<T>(await response.Content.ReadAsStringAsync());
             }
         }
-        private Message ConvertToMessage(MessageData messageData)
+        private Message ConvertToMessage(ResultInfo messageData)
         {
             if (messageData == null)
             {
@@ -392,9 +392,42 @@ namespace BaseBotLib.Services.Bot
                 FirstName = messageData.Info?.UserData?.FirstName ?? messageData.CallbackQuery?.UserData?.FirstName,
                 LastName = messageData.Info?.UserData?.LastName ?? messageData.CallbackQuery?.UserData?.LastName,
                 UserId = messageData.Info?.UserData?.Id ?? messageData.CallbackQuery?.UserData?.Id ?? -1,
-                UserName = messageData.Info?.UserData.UserName ?? messageData.CallbackQuery?.UserData?.UserName,
+                UserName = messageData.Info?.UserData?.UserName ?? messageData.CallbackQuery?.UserData?.UserName,
                 ChatId = messageData.Info?.ChatData?.Id ?? messageData.CallbackQuery?.Info?.ChatData?.Id ?? -1,
-                FileId = messageData.Info?.DocumentData?.FileId ?? messageData.Info?.Photos?.FirstOrDefault()?.FileId,
+
+                FileId = messageData.Info?.DocumentData?.FileId ??
+                         messageData.Info?.Photos?.FirstOrDefault()?.FileId ??
+                         messageData.Info?.Voice?.FileId,
+                Document = messageData.Info?.DocumentData != null
+                    ? new Document
+                    {
+                        FileId = messageData.Info.DocumentData.FileId,
+                        FileUniqueId = messageData.Info.DocumentData.FileUniqueId,
+                        FileName = messageData.Info.DocumentData.FileName,
+                        FileSize = messageData.Info.DocumentData.FileSize,
+                        MimeType = messageData.Info.DocumentData.MimeType,
+                    }
+                    : null,
+                Voice = messageData.Info?.Voice != null
+                    ? new Voice
+                    {
+                        FileId = messageData.Info.Voice.FileId,
+                        FileUniqueId = messageData.Info.Voice.FileUniqueId,
+                        FileSize = messageData.Info.Voice.FileSize,
+                        MimeType = messageData.Info.Voice.MimeType,
+                        Duration = messageData.Info.Voice.Duration,
+                    }
+                    : null,
+                Photos = (messageData.Info?.Photos?.Any() ?? false)
+                    ? messageData.Info?.Photos.Select(photo => new Photo
+                    {
+                        FileId = photo.FileId,
+                        FileUniqueId = photo.FileUniqueId,
+                        FileSize = photo.FileSize,
+                        Width = photo.Width,
+                        Height = photo.Height,
+                    }).ToArray()
+                    : Array.Empty<Photo>(),
             };
         }
 
