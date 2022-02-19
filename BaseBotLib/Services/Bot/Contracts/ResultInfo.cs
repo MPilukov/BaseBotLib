@@ -9,7 +9,7 @@ namespace BaseBotLib.Services.Bot.Contracts
         public MessageInfo Info { get; set; }
 
         [DataMember(Name = "update_id")]
-        public string UpdateId { get; set; }
+        public long UpdateId { get; set; }
 
         [DataMember(Name = "callback_query")]
         public CallbackQuery CallbackQuery { get; set; }
