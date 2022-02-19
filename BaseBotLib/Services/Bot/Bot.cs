@@ -24,7 +24,7 @@ namespace BaseBotLib.Services.Bot
 
         private const string LastMessageIdxName = "LastMessageIdx";
         private const string LimitSelectName = "LimitSelect";
-        private string LastMessageIdx { get; set; }
+        private long LastMessageIdx { get; set; }
         private int LimitSelect { get; set; }
 
         public Bot(string id, string token, IStorage storage, ILogger logger = null)
@@ -53,7 +53,7 @@ namespace BaseBotLib.Services.Bot
         private void Init()
         {
             LimitSelect = Storage == null ? 20 : Convert.ToInt32(Storage.GetValue(LimitSelectName).Result ?? "20");
-            LastMessageIdx = Storage == null ? "0" : Storage.GetValue(LastMessageIdxName).Result;
+            LastMessageIdx = Storage == null ? 0 : Convert.ToInt64(Storage.GetValue(LastMessageIdxName).Result ?? "0");
 
             var botName = GetBotName().Result;
 
@@ -97,7 +97,7 @@ namespace BaseBotLib.Services.Bot
                         LastMessageIdx = response.Result.Max(x => x.UpdateId) + 1;
                         if (Storage != null)
                         {
-                            await Storage.SetValue(LastMessageIdxName, LastMessageIdx);
+                            await Storage.SetValue(LastMessageIdxName, LastMessageIdx.ToString());
                         }
                     }
                 }
