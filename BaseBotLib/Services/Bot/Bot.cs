@@ -22,9 +22,9 @@ namespace BaseBotLib.Services.Bot
         private ILogger Logger { get; }
         private IStorage Storage { get; }
 
-        private string _lastMessageIdxName = "LastMessageIdx";
-        private string _limitSelectName = "LimitSelect";
-        private int LastMessageIdx { get; set; }
+        private const string LastMessageIdxName = "LastMessageIdx";
+        private const string LimitSelectName = "LimitSelect";
+        private string LastMessageIdx { get; set; }
         private int LimitSelect { get; set; }
 
         public Bot(string id, string token, IStorage storage, ILogger logger = null)
@@ -52,8 +52,8 @@ namespace BaseBotLib.Services.Bot
 
         private void Init()
         {
-            LimitSelect = Storage == null ? 20 : Convert.ToInt32(Storage.GetValue(_limitSelectName).Result ?? "20");
-            LastMessageIdx = Storage == null ? 0 : Convert.ToInt32(Storage.GetValue(_lastMessageIdxName).Result ?? "0");
+            LimitSelect = Storage == null ? 20 : Convert.ToInt32(Storage.GetValue(LimitSelectName).Result ?? "20");
+            LastMessageIdx = Storage == null ? "0" : Storage.GetValue(LastMessageIdxName).Result;
 
             var botName = GetBotName().Result;
 
@@ -82,7 +82,7 @@ namespace BaseBotLib.Services.Bot
         {
             var url = $"{Url}/getUpdates?limit={LimitSelect}&offset={LastMessageIdx}";
 
-            var result = new Message[0];
+            var result = Array.Empty<Message>();
 
             try
             {
@@ -97,7 +97,7 @@ namespace BaseBotLib.Services.Bot
                         LastMessageIdx = response.Result.Max(x => x.UpdateId) + 1;
                         if (Storage != null)
                         {
-                            await Storage.SetValue(_lastMessageIdxName, LastMessageIdx.ToString());
+                            await Storage.SetValue(LastMessageIdxName, LastMessageIdx);
                         }
                     }
                 }
@@ -108,7 +108,7 @@ namespace BaseBotLib.Services.Bot
             }
             catch (Exception exp)
             {
-                Logger?.Warn($"Ошибка при получении списка сообщений : {exp.ToString()}.");
+                Logger?.Warn($"Ошибка при получении списка сообщений : {exp}.");
             }
 
             return result;
@@ -123,7 +123,7 @@ namespace BaseBotLib.Services.Bot
             }
             catch (Exception exp)
             {
-                Logger?.Warn($"Ошибка при отправке сообщения клиенту : {text} / {chatId} : {exp.ToString()}.");
+                Logger?.Warn($"Ошибка при отправке сообщения клиенту : {text} / {chatId} : {exp}.");
             }
         }
 
@@ -166,16 +166,16 @@ namespace BaseBotLib.Services.Bot
             return PostInternal(url, new Dictionary<string, string>());
         }
 
-        private KeyboardButton[][] GetButtons(string[] texts)
+        private static KeyboardButton[][] GetButtons(IReadOnlyList<string> texts)
         {
             var response = new List<KeyboardButton[]>();
 
             var count = 0;
-            while (count < texts.Length)
+            while (count < texts.Count)
             {
-                if (texts.Length - count == 1)
+                if (texts.Count - count == 1)
                 {
-                    response.Add(new KeyboardButton[] {
+                    response.Add(new [] {
                         new KeyboardButton
                         {
                             Text = texts[count],
@@ -186,7 +186,7 @@ namespace BaseBotLib.Services.Bot
                 }
                 else
                 {
-                    response.Add(new KeyboardButton[] {
+                    response.Add(new [] {
                         new KeyboardButton
                         {
                             Text = texts[count],
@@ -198,22 +198,22 @@ namespace BaseBotLib.Services.Bot
                     });
 
                     count += 2;
-                };
+                }
             }
 
             return response.ToArray();
         }
 
-        private InlineButton[][] GetInlineButtons(string[] texts)
+        private static InlineButton[][] GetInlineButtons(IReadOnlyList<string> texts)
         {
             var response = new List<InlineButton[]>();
 
             var count = 0;
-            while (count < texts.Length)
+            while (count < texts.Count)
             {
-                if (texts.Length - count == 1)
+                if (texts.Count - count == 1)
                 {
-                    response.Add(new InlineButton[] {
+                    response.Add(new [] {
                         new InlineButton
                         {
                             Text = texts[count],
@@ -225,7 +225,7 @@ namespace BaseBotLib.Services.Bot
                 }
                 else
                 {
-                    response.Add(new InlineButton[] {
+                    response.Add(new [] {
                         new InlineButton
                         {
                             Text = texts[count],
@@ -239,7 +239,7 @@ namespace BaseBotLib.Services.Bot
                     });
 
                     count += 2;
-                };
+                }
             }
 
             return response.ToArray();
@@ -260,9 +260,9 @@ namespace BaseBotLib.Services.Bot
             return CreateInlineKeyboardInternal(chatId, text, texts, oneTime, resizeKeyboard);
         }
 
-        private Task CreateInlineKeyboardInternal(string chatId, string text, string[] texts, bool oneTime, bool resizeKeyboard)
+        private Task CreateInlineKeyboardInternal(string chatId, string text, IReadOnlyList<string> texts, bool oneTime, bool resizeKeyboard)
         {
-            if (texts.Length == 0)
+            if (texts.Count == 0)
             {
                 return Task.FromResult(0);
             }
@@ -284,7 +284,7 @@ namespace BaseBotLib.Services.Bot
             return PostInternal(url, new Dictionary<string, string>());
         }
 
-        private async Task PostInternal(string url, Dictionary<string, string> headers)
+        private static async Task PostInternal(string url, Dictionary<string, string> headers)
         {
             var content = new StringContent(string.Empty);
             if (headers != null)
@@ -334,7 +334,7 @@ namespace BaseBotLib.Services.Bot
                 }
             }
         }
-        private async Task<T> GetInternal<T>(string url, Dictionary<string, string> headers = null)
+        private static async Task<T> GetInternal<T>(string url, Dictionary<string, string> headers = null)
         {
             var request = new HttpRequestMessage(HttpMethod.Get, url);
             if (headers != null)
@@ -386,14 +386,14 @@ namespace BaseBotLib.Services.Bot
 
             return new Message
             {
-                Id = messageData.Info?.MessageId ?? messageData.CallbackQuery?.Info?.MessageId ?? -1,
+                Id = messageData.Info?.MessageId ?? messageData.CallbackQuery?.Info?.MessageId ?? "-1",
                 Text = messageData.Info?.Text ?? messageData.CallbackQuery?.Data,
                 RequestText = messageData.CallbackQuery?.Info?.Text,
                 FirstName = messageData.Info?.UserData?.FirstName ?? messageData.CallbackQuery?.UserData?.FirstName,
                 LastName = messageData.Info?.UserData?.LastName ?? messageData.CallbackQuery?.UserData?.LastName,
-                UserId = messageData.Info?.UserData?.Id ?? messageData.CallbackQuery?.UserData?.Id ?? -1,
+                UserId = messageData.Info?.UserData?.Id ?? messageData.CallbackQuery?.UserData?.Id ?? "-1",
                 UserName = messageData.Info?.UserData?.UserName ?? messageData.CallbackQuery?.UserData?.UserName,
-                ChatId = messageData.Info?.ChatData?.Id ?? messageData.CallbackQuery?.Info?.ChatData?.Id ?? -1,
+                ChatId = messageData.Info?.ChatData?.Id ?? messageData.CallbackQuery?.Info?.ChatData?.Id ?? "-1",
 
                 FileId = messageData.Info?.DocumentData?.FileId ??
                          messageData.Info?.Photos?.FirstOrDefault()?.FileId ??
