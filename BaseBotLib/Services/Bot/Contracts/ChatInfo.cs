@@ -9,7 +9,7 @@ namespace BaseBotLib.Services.Bot.Contracts
         public string UserName { get; set; }
         
         [DataMember(Name="id")]
-        public int Id { get; set; }
+        public string Id { get; set; }
         
         [DataMember(Name="first_name")]
         public string FirstName { get; set; }

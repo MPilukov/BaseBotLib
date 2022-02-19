@@ -12,7 +12,7 @@ namespace BaseBotLib.Services.Bot.Contracts
         public string Text { get; set; }
         
         [DataMember(Name = "message_id")]
-        public int MessageId { get; set; }
+        public string MessageId { get; set; }
         
         [DataMember(Name = "from")]
         public UserInfo UserData { get; set; }
