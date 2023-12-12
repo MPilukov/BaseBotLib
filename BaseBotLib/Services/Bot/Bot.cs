@@ -452,13 +452,13 @@ namespace BaseBotLib.Services.Bot
                 }
                 catch (Exception exc)
                 {
-                    Logger.Warn($"При получении файла ({filePath}) " +
+                    Logger?.Warn($"При получении файла ({filePath}) " +
                        $"получили ошибку : {exc.Message}.");
                     return null;
                 }
             }
 
-            Logger.Warn($"При получении информации о файде ({fileId}) " +
+            Logger?.Warn($"При получении информации о файде ({fileId}) " +
                 $"получили ошибку : {getFileResponse.ErrorDescription}.");
             return null;
         }

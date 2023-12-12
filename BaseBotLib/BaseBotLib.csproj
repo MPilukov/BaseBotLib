@@ -5,7 +5,7 @@
     <PackageId>BaseBotLib_Pilyukov</PackageId>
     <Authors>Pilyukov</Authors>
     <Company>PilyukovInc</Company>
-    <Version>1.0.13</Version>
+    <Version>1.0.14</Version>
     <Description>Easy way to create telegram-bot</Description>
   </PropertyGroup>
 
