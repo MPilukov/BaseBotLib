@@ -44,6 +44,7 @@ namespace BaseBotLib.Services.Bot
         {
             Id = id;
             Url = $"https://api.telegram.org/bot{Id}:{token}";
+            FileUrl = $"https://api.telegram.org/file/bot{Id}:{token}";
 
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
 
