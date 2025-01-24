@@ -60,7 +60,7 @@ namespace BaseBotLib.Services.Bot
 
             if (!string.IsNullOrWhiteSpace(botName))
             {
-                Logger?.Info($"Запущен бот - {botName}.");
+                Logger?.Info($"Bot launched - {botName}.");
             }
         }
 
@@ -75,7 +75,7 @@ namespace BaseBotLib.Services.Bot
                 return response.BotInfo?.FirstName;
             }
 
-            Logger?.Warn($"При получении информации о боте ({Id}) получили ошибку : {response.ErrorDescription}.");
+            Logger?.Warn($"When receiving information about the bot ({Id}) we received an error : {response.ErrorDescription}.");
             return null;
         }
 
@@ -104,12 +104,12 @@ namespace BaseBotLib.Services.Bot
                 }
                 else
                 {
-                    Logger?.Warn($"При получении списка сообщений сервер вернул ошибку : {response.ErrorDescription}.");
+                    Logger?.Warn($"When receiving a list of messages, the server returned an error : {response.ErrorDescription}.");
                 }
             }
             catch (Exception exp)
             {
-                Logger?.Warn($"Ошибка при получении списка сообщений : {exp}.");
+                Logger?.Warn($"Error getting list of messages : {exp}.");
             }
 
             return result;
@@ -124,7 +124,7 @@ namespace BaseBotLib.Services.Bot
             }
             catch (Exception exp)
             {
-                Logger?.Warn($"Ошибка при отправке сообщения клиенту : {text} / {chatId} : {exp}.");
+                Logger?.Warn($"Error sending message to client : {text} / {chatId} : {exp}.");
             }
         }
 
@@ -176,7 +176,7 @@ namespace BaseBotLib.Services.Bot
             {
                 if (texts.Count - count == 1)
                 {
-                    response.Add(new [] {
+                    response.Add(new[] {
                         new KeyboardButton
                         {
                             Text = texts[count],
@@ -187,7 +187,7 @@ namespace BaseBotLib.Services.Bot
                 }
                 else
                 {
-                    response.Add(new [] {
+                    response.Add(new[] {
                         new KeyboardButton
                         {
                             Text = texts[count],
@@ -214,7 +214,7 @@ namespace BaseBotLib.Services.Bot
             {
                 if (texts.Count - count == 1)
                 {
-                    response.Add(new [] {
+                    response.Add(new[] {
                         new InlineButton
                         {
                             Text = texts[count],
@@ -226,7 +226,7 @@ namespace BaseBotLib.Services.Bot
                 }
                 else
                 {
-                    response.Add(new [] {
+                    response.Add(new[] {
                         new InlineButton
                         {
                             Text = texts[count],
@@ -305,7 +305,7 @@ namespace BaseBotLib.Services.Bot
                 if (!response.IsSuccessStatusCode)
                 {
                     throw new Exception(
-                        $"Ошибка при выполнении запроса. {response.StatusCode} {await response.Content.ReadAsStringAsync()}.");
+                        $"Error executing request. {response.StatusCode} {await response.Content.ReadAsStringAsync()}.");
                 }
             }
         }
@@ -331,7 +331,7 @@ namespace BaseBotLib.Services.Bot
                 if (!response.IsSuccessStatusCode)
                 {
                     throw new Exception(
-                        $"Ошибка при выполнении запроса. {response.StatusCode} {await response.Content.ReadAsStringAsync()}.");
+                        $"Error executing request. {response.StatusCode} {await response.Content.ReadAsStringAsync()}.");
                 }
             }
         }
@@ -353,7 +353,7 @@ namespace BaseBotLib.Services.Bot
                 if (!response.IsSuccessStatusCode)
                 {
                     throw new Exception(
-                        $"Ошибка при выполнении запроса. {response.StatusCode} {await response.Content.ReadAsStringAsync()}.");
+                        $"Error executing request. {response.StatusCode} {await response.Content.ReadAsStringAsync()}.");
                 }
 
                 return JsonConvert.DeserializeObject<T>(await response.Content.ReadAsStringAsync());
@@ -363,25 +363,25 @@ namespace BaseBotLib.Services.Bot
         {
             if (messageData == null)
             {
-                Logger?.Warn("Cообщение пусто.");
+                Logger?.Warn("Message is empty.");
                 return null;
             }
 
             if (messageData.Info == null && messageData.CallbackQuery == null)
             {
-                Logger?.Warn("Информация о сообщении пуста.");
+                Logger?.Warn("Message information is empty.");
                 return null;
             }
 
             if (messageData.Info?.UserData == null && messageData.CallbackQuery?.UserData == null)
             {
-                Logger?.Warn("Информация о пользователе пуста.");
+                Logger?.Warn("User information is empty.");
                 return null;
             }
 
             if (messageData.Info?.ChatData == null && messageData.CallbackQuery?.Info?.ChatData == null)
             {
-                Logger?.Warn("Информация о чате пуста.");
+                Logger?.Warn("Chat information is empty.");
                 return null;
             }
 
@@ -453,14 +453,14 @@ namespace BaseBotLib.Services.Bot
                 }
                 catch (Exception exc)
                 {
-                    Logger?.Warn($"При получении файла ({filePath}) " +
-                       $"получили ошибку : {exc.Message}.");
+                    Logger?.Warn($"When receiving the file ({filePath}) " +
+                       $"got an error : {exc.Message}.");
                     return null;
                 }
             }
 
-            Logger?.Warn($"При получении информации о файде ({fileId}) " +
-                $"получили ошибку : {getFileResponse.ErrorDescription}.");
+            Logger?.Warn($"When receiving file information ({fileId}) " +
+                $"got an error : {getFileResponse.ErrorDescription}.");
             return null;
         }
     }
