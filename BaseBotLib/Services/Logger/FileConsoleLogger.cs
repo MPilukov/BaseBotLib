@@ -35,7 +35,7 @@ namespace BaseBotLib.Services.Logger
             }
             catch (Exception e)
             {
-                _defaultlogger.Warn($"Ошибка при записи логов в файл : {e}.");
+                _defaultlogger.Warn($"Error writing logs to file : {e}.");
             }
         }
 
