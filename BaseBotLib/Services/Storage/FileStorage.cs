@@ -76,7 +76,7 @@ namespace BaseBotLib.Services.Storage
             {
                 if (string.IsNullOrWhiteSpace(_fileName))
                 {
-                    _logger?.Warn("Имя файла для сервис-хранилища пусто.");
+                    _logger?.Warn("The file name for the service storage is empty.");
                     return false;
                 }
 
@@ -99,7 +99,7 @@ namespace BaseBotLib.Services.Storage
             }
             catch (Exception e)
             {
-                _logger?.Warn($"Ошибка при создании/проверки существования файла ({_fileName}) : {e}.");
+                _logger?.Warn($"Error creating/checking file existence ({_fileName}) : {e}.");
                 return false;
             }
         }
@@ -113,12 +113,12 @@ namespace BaseBotLib.Services.Storage
                     return File.ReadAllText(_fileName);
                 }
 
-                _logger.Warn("Ошибка при чтении данных из файла.");
+                _logger.Warn("Error reading data from file.");
                 return null;
             }
             catch (Exception e)
             {
-                _logger.Warn($"Ошибка при чтении данных из файла : {e}.");
+                _logger.Warn($"Error reading data from file : { e}.");
                 return null;
             }
         }
@@ -133,12 +133,12 @@ namespace BaseBotLib.Services.Storage
                     return true;
                 }
 
-                _logger.Warn("Ошибка при записи данных в файл.");
+                _logger.Warn("Error writing data to file.");
                 return false;
             }
             catch (Exception e)
             {
-                _logger.Warn($"Ошибка при записи данных в файл : {e}.");
+                _logger.Warn($"Error writing data to file : {e}.");
                 return false;
             }
         }
