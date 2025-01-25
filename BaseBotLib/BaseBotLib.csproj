@@ -4,7 +4,7 @@
 		<TargetFrameworks>netstandard2.0;net8.0</TargetFrameworks>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<PackageId>BaseBotLib_Pilyukov</PackageId>
-		<Authors>Pilyukov</Authors>
+		<Authors>Maksim Pilukov</Authors>
 		<Company>PilyukovInc</Company>
 		<Version>1.0.17</Version>
 		<Description>Easy way to create telegram-bot</Description>
