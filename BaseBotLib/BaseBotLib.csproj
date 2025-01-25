@@ -1,16 +1,21 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
-    <PackageId>BaseBotLib_Pilyukov</PackageId>
-    <Authors>Pilyukov</Authors>
-    <Company>PilyukovInc</Company>
-    <Version>1.0.16</Version>
-    <Description>Easy way to create telegram-bot</Description>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFrameworks>netstandard2.0;net8.0</TargetFrameworks>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<PackageId>BaseBotLib_Pilyukov</PackageId>
+		<Authors>Maksim Pilukov</Authors>
+		<Company>PilyukovInc</Company>
+		<Version>1.0.17</Version>
+		<Description>Easy way to create telegram-bot</Description>
+		<RepositoryUrl>https://github.com/MPilukov/BaseBotLib</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+		<None Include="..\README.md" Pack="true" PackagePath=""/>
+	</ItemGroup>
 
 </Project>
