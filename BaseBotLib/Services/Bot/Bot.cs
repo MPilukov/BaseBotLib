@@ -463,5 +463,17 @@ namespace BaseBotLib.Services.Bot
                 $"got an error : {getFileResponse.ErrorDescription}.");
             return null;
         }
+
+        public Task SetWebhook(string url)
+        {
+            // todo: implement
+            throw new NotImplementedException();
+        }
+
+        public Task DeleteWebhook(string url)
+        {
+            // todo: implement
+            throw new NotImplementedException();
+        }
     }
 }
