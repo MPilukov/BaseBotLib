@@ -14,9 +14,7 @@ namespace BaseBotLib.Interfaces.Bot
         Task CreateInlineKeyboard(string chatId, string textMenu, string[] textButtons, bool oneTime);
         Task CreateInlineKeyboard(string chatId, string textMenu, string[] textButtons, bool oneTime, bool resizeKeyboard);
         Task<byte[]> GetFile(string fileId);
-        
-        // https://core.telegram.org/bots/api#setwebhook
-        Task SetWebhook(string url);
-        Task DeleteWebhook(string url);
+        Task<BaseResponse> SetWebhook(string webhookUrl, string secretToken);
+        Task<BaseResponse> DeleteWebhook();
     }
 }
