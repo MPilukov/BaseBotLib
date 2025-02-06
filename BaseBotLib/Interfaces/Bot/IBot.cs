@@ -14,8 +14,9 @@ namespace BaseBotLib.Interfaces.Bot
         Task CreateInlineKeyboard(string chatId, string textMenu, string[] textButtons, bool oneTime);
         Task CreateInlineKeyboard(string chatId, string textMenu, string[] textButtons, bool oneTime, bool resizeKeyboard);
         Task<byte[]> GetFile(string fileId);
+        
         /// <summary>
-        /// You cannot get new messages with GetNewMessages() method after setting webhook.
+        /// You cannot use the GetNewMessages() method after setting a webhook.
         /// </summary>
         /// <param name="webhookUrl"></param>
         /// <param name="secretToken"></param>
