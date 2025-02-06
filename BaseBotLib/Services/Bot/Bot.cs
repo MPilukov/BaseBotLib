@@ -265,7 +265,7 @@ namespace BaseBotLib.Services.Bot
         {
             try
             {
-                var url = $"{Url}/setWebhook?url={HttpUtility.UrlEncode(webhookUrl)}&secret_token={HttpUtility.UrlEncode(secretToken)}";
+                var url = $"{Url}/setWebhook?url={webhookUrl}&secret_token={HttpUtility.UrlEncode(secretToken)}";
                 await PostInternal(url, new Dictionary<string, string>());
                 return new BaseResponse();
             }
