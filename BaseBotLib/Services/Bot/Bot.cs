@@ -261,6 +261,42 @@ namespace BaseBotLib.Services.Bot
             return CreateInlineKeyboardInternal(chatId, text, texts, oneTime, resizeKeyboard);
         }
 
+        public async Task<BaseResponse> SetWebhook(string webhookUrl, string secretToken)
+        {
+            try
+            {
+                var url = $"{Url}/setWebhook?url={webhookUrl}&secret_token={HttpUtility.UrlEncode(secretToken)}";
+                await PostInternal(url, new Dictionary<string, string>());
+                return new BaseResponse();
+            }
+            catch (Exception exp)
+            {
+                Logger?.Warn($"Error adding webhook {webhookUrl} : {exp}.");
+                return new BaseResponse
+                {
+                    ErrorText = exp.Message,
+                };
+            }
+        }
+
+        public async Task<BaseResponse> DeleteWebhook()
+        {
+            try
+            {
+                var url = $"{Url}/deleteWebhook";
+                await PostInternal(url, new Dictionary<string, string>());
+                return new BaseResponse();
+            }
+            catch (Exception exp)
+            {
+                Logger?.Warn($"Error deleting webhook : {exp}.");
+                return new BaseResponse
+                {
+                    ErrorText = exp.Message,
+                };
+            }
+        }
+
         private Task CreateInlineKeyboardInternal(string chatId, string text, IReadOnlyList<string> texts, bool oneTime, bool resizeKeyboard)
         {
             if (texts.Count == 0)
