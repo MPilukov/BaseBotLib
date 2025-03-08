@@ -235,21 +235,23 @@ namespace BaseBotLib.Services.Bot
                     return response;
                 }
 
-                var data = GetInlineButtons(menu.Buttons);
-
-                var body = new CreateInlineKeyboardRequest
+                var buttons = GetInlineButtons(menu.Buttons);
+                
+                var body = new InlineSelectionMenuRequest
                 {
-                    OneTime = menu.OneTime,
-                    ResizeKeyboard = menu.ResizeKeyboard,
-                    InlineButtons = data,
+                    ChatId = chatId,
+                    Text = menu.MenuText,
+                    CreateInlineKeyboardRequest = new CreateInlineKeyboardRequest
+                    {
+                        OneTime = menu.OneTime,
+                        ResizeKeyboard = menu.ResizeKeyboard,
+                        InlineButtons = buttons,
+                    },
                 };
+                
+                var url = $"{Url}/sendMessage";
 
-                var bodyString = JsonConvert.SerializeObject(body);
-
-                var url = $"{Url}/sendMessage?chat_id={chatId}&text={HttpUtility.UrlEncode(menu.MenuText)}" +
-                          $"&reply_markup={HttpUtility.UrlEncode(bodyString)}";
-
-                await PostInternal(url, new Dictionary<string, string>());
+                await PostInternal(url, body, new Dictionary<string, string>());
 
                 return response;
             }
