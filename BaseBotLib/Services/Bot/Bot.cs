@@ -11,6 +11,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using System.Web;
+using BaseBotLib.Interfaces.Bot.Menu;
 
 namespace BaseBotLib.Services.Bot
 {
@@ -128,21 +129,35 @@ namespace BaseBotLib.Services.Bot
             }
         }
 
+        public Task<BaseResponse> SendSelectionMenu(string chatId, SelectionMenu menu)
+        {
+            return SendSelectionMenuInternal(chatId, menu);
+        }
+
+        public Task<BaseResponse> SendInlineSelectionMenu(string chatId, InlineSelectionMenu menu)
+        {
+            return SendInlineSelectionMenuInternal(chatId, menu);
+        }
+
+        [Obsolete]
         public Task CreateKeyboard(string chatId, string text, string[] texts)
         {
             return CreateKeyboardInternal(chatId, text, texts, true, true);
         }
 
+        [Obsolete]
         public Task CreateKeyboard(string chatId, string text, string[] texts, bool oneTime)
         {
             return CreateKeyboardInternal(chatId, text, texts, oneTime, true);
         }
 
+        [Obsolete]
         public Task CreateKeyboard(string chatId, string text, string[] texts, bool oneTime, bool resizeKeyboard)
         {
             return CreateKeyboardInternal(chatId, text, texts, oneTime, resizeKeyboard);
         }
 
+        [Obsolete]
         private Task CreateKeyboardInternal(string chatId, string text, string[] texts, bool oneTime, bool resizeKeyboard)
         {
             if (texts.Length == 0)
@@ -150,7 +165,10 @@ namespace BaseBotLib.Services.Bot
                 return Task.FromResult(0);
             }
 
-            var data = GetButtons(texts);
+            var data = GetButtons(texts.Select(x => new SelectionMenuButton
+            {
+                Text = x,
+            }).ToArray());
 
             var body = new CreateKeyboardRequest
             {
@@ -162,24 +180,102 @@ namespace BaseBotLib.Services.Bot
             var bodyString = JsonConvert.SerializeObject(body);
 
             var url = $"{Url}/sendMessage?chat_id={chatId}&text={HttpUtility.UrlEncode(text)}" +
-                $"&reply_markup={HttpUtility.UrlEncode(bodyString)}";
+                      $"&reply_markup={HttpUtility.UrlEncode(bodyString)}";
 
             return PostInternal(url, new Dictionary<string, string>());
         }
 
-        private static KeyboardButton[][] GetButtons(IReadOnlyList<string> texts)
+        private async Task<BaseResponse> SendSelectionMenuInternal(string chatId, SelectionMenu menu)
+        {
+            var response = new BaseResponse();
+            
+            try
+            {
+                if (menu.Buttons.Count == 0)
+                {
+                    return response;
+                }
+
+                var data = GetButtons(menu.Buttons);
+
+                var body = new CreateKeyboardRequest
+                {
+                    OneTime = menu.OneTime,
+                    ResizeKeyboard = menu.ResizeKeyboard,
+                    Buttons = data,
+                };
+
+                var bodyString = JsonConvert.SerializeObject(body);
+
+                var url = $"{Url}/sendMessage?chat_id={chatId}&text={HttpUtility.UrlEncode(menu.MenuText)}" +
+                          $"&reply_markup={HttpUtility.UrlEncode(bodyString)}";
+
+                await PostInternal(url, new Dictionary<string, string>());
+                
+                return response;
+            }
+            catch (Exception exp)
+            {
+                Logger?.Warn($"Error sending selection menu : {exp}.");
+                return new BaseResponse
+                {
+                    ErrorText = exp.Message,
+                };
+            }
+        }
+
+        private async Task<BaseResponse> SendInlineSelectionMenuInternal(string chatId, InlineSelectionMenu menu)
+        {
+            var response = new BaseResponse();
+
+            try
+            {
+                if (menu.Buttons.Count == 0)
+                {
+                    return response;
+                }
+
+                var data = GetInlineButtons(menu.Buttons);
+
+                var body = new CreateInlineKeyboardRequest
+                {
+                    OneTime = menu.OneTime,
+                    ResizeKeyboard = menu.ResizeKeyboard,
+                    InlineButtons = data,
+                };
+
+                var bodyString = JsonConvert.SerializeObject(body);
+
+                var url = $"{Url}/sendMessage?chat_id={chatId}&text={HttpUtility.UrlEncode(menu.MenuText)}" +
+                          $"&reply_markup={HttpUtility.UrlEncode(bodyString)}";
+
+                await PostInternal(url, new Dictionary<string, string>());
+
+                return response;
+            }
+            catch (Exception exp)
+            {
+                Logger?.Warn($"Error sending inline selection menu : {exp}.");
+                return new BaseResponse
+                {
+                    ErrorText = exp.Message,
+                };
+            }
+        }
+
+        private static KeyboardButton[][] GetButtons(IReadOnlyList<SelectionMenuButton> buttons)
         {
             var response = new List<KeyboardButton[]>();
 
             var count = 0;
-            while (count < texts.Count)
+            while (count < buttons.Count)
             {
-                if (texts.Count - count == 1)
+                if (buttons.Count - count == 1)
                 {
                     response.Add(new[] {
                         new KeyboardButton
                         {
-                            Text = texts[count],
+                            Text = buttons[count].Text,
                         }
                     });
 
@@ -190,11 +286,11 @@ namespace BaseBotLib.Services.Bot
                     response.Add(new[] {
                         new KeyboardButton
                         {
-                            Text = texts[count],
+                            Text = buttons[count].Text,
                         },
                         new KeyboardButton
                         {
-                            Text = texts[count + 1],
+                            Text = buttons[count + 1].Text,
                         },
                     });
 
@@ -205,7 +301,52 @@ namespace BaseBotLib.Services.Bot
             return response.ToArray();
         }
 
-        private static InlineButton[][] GetInlineButtons(IReadOnlyList<string> texts)
+        private static InlineButton[][] GetInlineButtons(IReadOnlyList<InlineSelectionMenuButton> buttons)
+        {
+            var response = new List<InlineButton[]>();
+
+            var count = 0;
+            while (count < buttons.Count)
+            {
+                if (buttons.Count - count == 1)
+                {
+                    response.Add(new[] {
+                        new InlineButton
+                        {
+                            Text = buttons[count].Text,
+                            CallbackData = buttons[count].CallbackData,
+                            Url = buttons[count].Url,
+                        }
+                    });
+
+                    count += 1;
+                }
+                else
+                {
+                    response.Add(new[] {
+                        new InlineButton
+                        {
+                            Text = buttons[count].Text,
+                            CallbackData = buttons[count].CallbackData,
+                            Url = buttons[count].Url,
+                        },
+                        new InlineButton
+                        {
+                            Text = buttons[count + 1].Text,
+                            CallbackData = buttons[count + 1].CallbackData,
+                            Url = buttons[count + 1].Url,
+                        },
+                    });
+
+                    count += 2;
+                }
+            }
+
+            return response.ToArray();
+        }
+
+        [Obsolete]
+        private static InlineButton[][] GetOldInlineButtons(IReadOnlyList<string> texts)
         {
             var response = new List<InlineButton[]>();
 
@@ -246,16 +387,19 @@ namespace BaseBotLib.Services.Bot
             return response.ToArray();
         }
 
+        [Obsolete]
         public Task CreateInlineKeyboard(string chatId, string text, string[] texts)
         {
             return CreateInlineKeyboardInternal(chatId, text, texts, true, true);
         }
 
+        [Obsolete]
         public Task CreateInlineKeyboard(string chatId, string text, string[] texts, bool oneTime)
         {
             return CreateInlineKeyboardInternal(chatId, text, texts, oneTime, true);
         }
 
+        [Obsolete]
         public Task CreateInlineKeyboard(string chatId, string text, string[] texts, bool oneTime, bool resizeKeyboard)
         {
             return CreateInlineKeyboardInternal(chatId, text, texts, oneTime, resizeKeyboard);
@@ -297,6 +441,7 @@ namespace BaseBotLib.Services.Bot
             }
         }
 
+        [Obsolete]
         private Task CreateInlineKeyboardInternal(string chatId, string text, IReadOnlyList<string> texts, bool oneTime, bool resizeKeyboard)
         {
             if (texts.Count == 0)
@@ -304,7 +449,7 @@ namespace BaseBotLib.Services.Bot
                 return Task.FromResult(0);
             }
 
-            var data = GetInlineButtons(texts);
+            var data = GetOldInlineButtons(texts);
 
             var body = new CreateInlineKeyboardRequest
             {

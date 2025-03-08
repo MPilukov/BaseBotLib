@@ -10,5 +10,8 @@ namespace BaseBotLib.Services.Bot.Contracts
 
         [DataMember(Name = "callback_data")]
         public string CallbackData { get; set; }
+        
+        [DataMember(Name = "url")]
+        public string Url { get; set; }
     }
 }
