@@ -1,4 +1,6 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
+using BaseBotLib.Interfaces.Bot.Menu;
 
 namespace BaseBotLib.Interfaces.Bot
 {
@@ -7,12 +9,10 @@ namespace BaseBotLib.Interfaces.Bot
         Task<string> GetBotName();
         Task<Message[]> GetNewMessages();
         Task SendMessage(string chatId, string text);
-        Task CreateKeyboard(string chatId, string textMenu, string[] textButtons);
-        Task CreateKeyboard(string chatId, string textMenu, string[] textButtons, bool oneTime);
-        Task CreateKeyboard(string chatId, string textMenu, string[] textButtons, bool oneTime, bool resizeKeyboard);
-        Task CreateInlineKeyboard(string chatId, string textMenu, string[] textButtons);
-        Task CreateInlineKeyboard(string chatId, string textMenu, string[] textButtons, bool oneTime);
-        Task CreateInlineKeyboard(string chatId, string textMenu, string[] textButtons, bool oneTime, bool resizeKeyboard);
+        
+        // todo: send file/photo
+        Task<BaseResponse> SendSelectionMenu(string chatId, SelectionMenu menu);
+        Task<BaseResponse> SendInlineSelectionMenu(string chatId, InlineSelectionMenu menu);
         Task<byte[]> GetFile(string fileId);
         
         /// <summary>
@@ -23,5 +23,24 @@ namespace BaseBotLib.Interfaces.Bot
         /// <returns></returns>
         Task<BaseResponse> SetWebhook(string webhookUrl, string secretToken);
         Task<BaseResponse> DeleteWebhook();
+        Task<Webhook> GetWebhooks();
+        
+        [Obsolete]
+        Task CreateKeyboard(string chatId, string textMenu, string[] textButtons);
+        
+        [Obsolete]
+        Task CreateKeyboard(string chatId, string textMenu, string[] textButtons, bool oneTime);
+        
+        [Obsolete]
+        Task CreateKeyboard(string chatId, string textMenu, string[] textButtons, bool oneTime, bool resizeKeyboard);
+        
+        [Obsolete]
+        Task CreateInlineKeyboard(string chatId, string textMenu, string[] textButtons);
+        
+        [Obsolete]
+        Task CreateInlineKeyboard(string chatId, string textMenu, string[] textButtons, bool oneTime);
+        
+        [Obsolete]
+        Task CreateInlineKeyboard(string chatId, string textMenu, string[] textButtons, bool oneTime, bool resizeKeyboard);
     }
 }

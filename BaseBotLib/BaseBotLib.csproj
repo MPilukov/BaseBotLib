@@ -6,7 +6,7 @@
 		<PackageId>BaseBotLib_Pilyukov</PackageId>
 		<Authors>Maksim Pilukov</Authors>
 		<Company>PilyukovInc</Company>
-		<Version>1.0.18</Version>
+		<Version>1.0.19</Version>
 		<Description>Easy way to create telegram-bot</Description>
 		<RepositoryUrl>https://github.com/MPilukov/BaseBotLib</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
