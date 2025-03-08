@@ -23,6 +23,7 @@ namespace BaseBotLib.Interfaces.Bot
         /// <returns></returns>
         Task<BaseResponse> SetWebhook(string webhookUrl, string secretToken);
         Task<BaseResponse> DeleteWebhook();
+        Task<Webhook> GetWebhooks();
         
         [Obsolete]
         Task CreateKeyboard(string chatId, string textMenu, string[] textButtons);

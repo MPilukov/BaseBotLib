@@ -120,8 +120,13 @@ namespace BaseBotLib.Services.Bot
         {
             try
             {
-                var url = $"{Url}/sendMessage?chat_id={chatId}&text={HttpUtility.UrlEncode(text)}";
-                await PostInternal(url, new Dictionary<string, string>());
+                var url = $"{Url}/sendMessage";
+                var body = new SendMessageRequest
+                {
+                    ChatId = chatId,
+                    Text = text,
+                };
+                await PostInternal(url, body, new Dictionary<string, string>());
             }
             catch (Exception exp)
             {
@@ -196,21 +201,24 @@ namespace BaseBotLib.Services.Bot
                     return response;
                 }
 
-                var data = GetButtons(menu.Buttons);
-
-                var body = new CreateKeyboardRequest
+                var buttons = GetButtons(menu.Buttons);
+                
+                var body = new SelectionMenuRequest
                 {
-                    OneTime = menu.OneTime,
-                    ResizeKeyboard = menu.ResizeKeyboard,
-                    Buttons = data,
+                    ChatId = chatId,
+                    Text = menu.MenuText,
+                    CreateKeyboardRequest = new CreateKeyboardRequest
+                    {
+                        OneTime = menu.OneTime,
+                        ResizeKeyboard = menu.ResizeKeyboard,
+                        Buttons = buttons,
+                    },
                 };
+                
+                var url = $"{Url}/sendMessage";
 
-                var bodyString = JsonConvert.SerializeObject(body);
-
-                var url = $"{Url}/sendMessage?chat_id={chatId}&text={HttpUtility.UrlEncode(menu.MenuText)}" +
-                          $"&reply_markup={HttpUtility.UrlEncode(bodyString)}";
-
-                await PostInternal(url, new Dictionary<string, string>());
+                await PostInternal(url, body, new Dictionary<string, string>());
+                
                 
                 return response;
             }
@@ -411,8 +419,15 @@ namespace BaseBotLib.Services.Bot
         {
             try
             {
-                var url = $"{Url}/setWebhook?url={webhookUrl}&secret_token={HttpUtility.UrlEncode(secretToken)}";
-                await PostInternal(url, new Dictionary<string, string>());
+                var body = new SetWebhookRequest
+                {
+                    Url = webhookUrl,
+                    SecretToken = secretToken,
+                };
+                
+                var url = $"{Url}/setWebhook";
+                await PostInternal(url, body, new Dictionary<string, string>());
+                
                 return new BaseResponse();
             }
             catch (Exception exp)
@@ -424,7 +439,6 @@ namespace BaseBotLib.Services.Bot
                 };
             }
         }
-
         public async Task<BaseResponse> DeleteWebhook()
         {
             try
@@ -437,6 +451,26 @@ namespace BaseBotLib.Services.Bot
             {
                 Logger?.Warn($"Error deleting webhook : {exp}.");
                 return new BaseResponse
+                {
+                    ErrorText = exp.Message,
+                };
+            }
+        }
+        public async Task<Webhook> GetWebhooks()
+        {
+            try
+            {
+                var url = $"{Url}/getWebhookInfo";
+                var response = await GetInternal<GetWebhookResponse>(url);
+                return new Webhook
+                {
+                    Url = response.Result.Url, 
+                };
+            }
+            catch (Exception exp)
+            {
+                Logger?.Warn($"Error getting webhooks : {exp}.");
+                return new Webhook
                 {
                     ErrorText = exp.Message,
                 };
@@ -539,7 +573,8 @@ namespace BaseBotLib.Services.Bot
                         $"Error executing request. {response.StatusCode} {await response.Content.ReadAsStringAsync()}.");
                 }
 
-                return JsonConvert.DeserializeObject<T>(await response.Content.ReadAsStringAsync());
+                var str = await response.Content.ReadAsStringAsync();
+                return JsonConvert.DeserializeObject<T>(str);
             }
         }
         private Message ConvertToMessage(ResultInfo messageData)
