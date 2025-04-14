@@ -160,12 +160,19 @@ namespace BaseBotLib.Services.Bot
             try
             {
                 var url = $"{Url}/sendMessage";
-                var body = new ExtendedSendMessageRequest
-                {
-                    ChatId = chatId,
-                    Text = text,
-                    ParseMode = parseMode,
-                };
+
+                var body = string.IsNullOrWhiteSpace(parseMode)
+                    ? new SendMessageRequest
+                    {
+                        ChatId = chatId,
+                        Text = text,
+                    }
+                    : new ExtendedSendMessageRequest
+                    {
+                        ChatId = chatId,
+                        Text = text,
+                        ParseMode = parseMode,
+                    };
                 await PostInternal(url, body, new Dictionary<string, string>());
             }
             catch (Exception exp)
