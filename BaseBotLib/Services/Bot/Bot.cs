@@ -9,7 +9,6 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Runtime.Serialization;
 using System.Threading.Tasks;
 using System.Web;
 using BaseBotLib.Interfaces.Bot.Menu;
@@ -183,13 +182,6 @@ namespace BaseBotLib.Services.Bot
     
         private static string ParseModeMarkdownV2 = "MarkdownV2";
         private static string ParseModeHTML = "HTML";
-    
-        [DataContract]
-        public class ExtendedSendMessageRequest : BaseBotLib.Services.Bot.Contracts.SendMessageRequest
-        {
-            [DataMember(Name = "parse_mode")]
-            public string ParseMode { get; set; }
-        }
 
         [Obsolete]
         public Task CreateKeyboard(string chatId, string text, string[] texts)
