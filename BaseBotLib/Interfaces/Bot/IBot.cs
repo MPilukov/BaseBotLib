@@ -7,6 +7,7 @@ namespace BaseBotLib.Interfaces.Bot
     public interface IBot
     {
         Task<string> GetBotName();
+        Task<string> GetBotUserName();
         Task<Message[]> GetNewMessages();
         Task<BaseResponse> SendMessage(string chatId, string text);
         Task<BaseResponse> SendMessageWithMarkdown(string chatId, string text);
