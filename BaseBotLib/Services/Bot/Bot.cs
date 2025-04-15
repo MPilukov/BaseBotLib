@@ -80,6 +80,21 @@ namespace BaseBotLib.Services.Bot
             return null;
         }
 
+        public async Task<string> GetBotUserName()
+        {
+            var url = $"{Url}/getMe";
+
+            var response = await GetInternal<GetMeResponse>(url);
+
+            if (response.IsSuccess)
+            {
+                return response.BotInfo?.UserName;
+            }
+
+            Logger?.Warn($"When receiving information about the bot ({Id}) we received an error : {response.ErrorDescription}.");
+            return null;
+        }
+
         public async Task<Message[]> GetNewMessages()
         {
             var url = $"{Url}/getUpdates?limit={LimitSelect}&offset={LastMessageIdx}";
@@ -116,22 +131,9 @@ namespace BaseBotLib.Services.Bot
             return result;
         }
 
-        public async Task SendMessage(string chatId, string text)
+        public async Task<BaseResponse> SendMessage(string chatId, string text)
         {
-            try
-            {
-                var url = $"{Url}/sendMessage";
-                var body = new SendMessageRequest
-                {
-                    ChatId = chatId,
-                    Text = text,
-                };
-                await PostInternal(url, body, new Dictionary<string, string>());
-            }
-            catch (Exception exp)
-            {
-                Logger?.Warn($"Error sending message to client : {text} / {chatId} : {exp}.");
-            }
+            return await SendMessageInternal(chatId, text);
         }
 
         public Task<BaseResponse> SendSelectionMenu(string chatId, SelectionMenu menu)
@@ -143,6 +145,50 @@ namespace BaseBotLib.Services.Bot
         {
             return SendInlineSelectionMenuInternal(chatId, menu);
         }
+
+        public async Task<BaseResponse> SendMessageWithMarkdown(string chatId, string text)
+        {
+            return await SendMessageInternal(chatId, text, ParseModeMarkdownV2);
+        }
+        public async Task<BaseResponse> SendMessageWithHtml(string chatId, string text)
+        {
+            return await SendMessageInternal(chatId, text, ParseModeHTML);
+        }
+    
+        private async Task<BaseResponse> SendMessageInternal(string chatId, string text, string parseMode = null)
+        {
+            try
+            {
+                var url = $"{Url}/sendMessage";
+
+                var body = string.IsNullOrWhiteSpace(parseMode)
+                    ? new SendMessageRequest
+                    {
+                        ChatId = chatId,
+                        Text = text,
+                    }
+                    : new ExtendedSendMessageRequest
+                    {
+                        ChatId = chatId,
+                        Text = text,
+                        ParseMode = parseMode,
+                    };
+                await PostInternal(url, body, new Dictionary<string, string>());
+            }
+            catch (Exception exp)
+            {
+                Logger?.Warn($"Error sending message : {exp}.");
+                return new BaseResponse
+                {
+                    ErrorText = exp.Message,
+                };
+            }
+
+            return new BaseResponse();
+        }
+    
+        private static string ParseModeMarkdownV2 = "MarkdownV2";
+        private static string ParseModeHTML = "HTML";
 
         [Obsolete]
         public Task CreateKeyboard(string chatId, string text, string[] texts)

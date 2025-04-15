@@ -7,8 +7,11 @@ namespace BaseBotLib.Interfaces.Bot
     public interface IBot
     {
         Task<string> GetBotName();
+        Task<string> GetBotUserName();
         Task<Message[]> GetNewMessages();
-        Task SendMessage(string chatId, string text);
+        Task<BaseResponse> SendMessage(string chatId, string text);
+        Task<BaseResponse> SendMessageWithMarkdown(string chatId, string text);
+        Task<BaseResponse> SendMessageWithHtml(string chatId, string text);
         
         // todo: send file/photo
         Task<BaseResponse> SendSelectionMenu(string chatId, SelectionMenu menu);
