@@ -136,6 +136,11 @@ namespace BaseBotLib.Services.Bot
             return await SendMessageInternal(chatId, text);
         }
 
+        public async Task<BaseResponse> DeleteMessage(string chatId, string messageId)
+        {
+            return await DeleteMessageInternal(chatId, messageId);
+        }
+
         public Task<BaseResponse> SendSelectionMenu(string chatId, SelectionMenu menu)
         {
             return SendSelectionMenuInternal(chatId, menu);
@@ -146,6 +151,16 @@ namespace BaseBotLib.Services.Bot
             return SendInlineSelectionMenuInternal(chatId, menu);
         }
 
+        public Task<BaseResponse> EditInlineSelectionMenu(string chatId, string messageId, InlineSelectionMenu menu)
+        {
+            return EditExistInlineSelectionMenuInternal(chatId, messageId, menu);
+        }
+
+        public Task<BaseResponse> DeleteExistInlineSelectionMenu(string chatId, string messageId)
+        {
+            return EditExistInlineSelectionMenuInternal(chatId, messageId, keyboardRequest: null);
+        }
+
         public async Task<BaseResponse> SendMessageWithMarkdown(string chatId, string text)
         {
             return await SendMessageInternal(chatId, text, ParseModeMarkdownV2);
@@ -153,6 +168,25 @@ namespace BaseBotLib.Services.Bot
         public async Task<BaseResponse> SendMessageWithHtml(string chatId, string text)
         {
             return await SendMessageInternal(chatId, text, ParseModeHTML);
+        }
+        
+        private async Task<BaseResponse> DeleteMessageInternal(string chatId, string messageId)
+        {
+            try
+            {
+                var url = $"{Url}/deleteMessage?chat_id={chatId}&message_id={messageId}";
+                await PostInternal(url, new Dictionary<string, string>());
+            }
+            catch (Exception exp)
+            {
+                Logger?.Warn($"Error deleting message : {exp}.");
+                return new BaseResponse
+                {
+                    ErrorText = exp.Message,
+                };
+            }
+
+            return new BaseResponse();
         }
     
         private async Task<BaseResponse> SendMessageInternal(string chatId, string text, string parseMode = null)
@@ -271,6 +305,76 @@ namespace BaseBotLib.Services.Bot
             catch (Exception exp)
             {
                 Logger?.Warn($"Error sending selection menu : {exp}.");
+                return new BaseResponse
+                {
+                    ErrorText = exp.Message,
+                };
+            }
+        }
+
+        private async Task<BaseResponse> EditExistInlineSelectionMenuInternal(
+            string chatId, string messageId, InlineSelectionMenu menu)
+        {
+            try
+            {
+                if (menu.Buttons.Count == 0)
+                {
+                    return new BaseResponse
+                    {
+                        ErrorText = "Inline menu is empty.",
+                    };
+                }
+
+                var buttons = GetInlineButtons(menu.Buttons);
+                
+                var createKeyboardRequest = new CreateInlineKeyboardRequest
+                {
+                    OneTime = menu.OneTime,
+                    ResizeKeyboard = menu.ResizeKeyboard,
+                    InlineButtons = buttons,
+                };
+
+                return await EditExistInlineSelectionMenuInternal(chatId, messageId, createKeyboardRequest);
+            }
+            catch (Exception exp)
+            {
+                Logger?.Warn($"Error sending inline selection menu : {exp}.");
+                return new BaseResponse
+                {
+                    ErrorText = exp.Message,
+                };
+            }
+        }
+        
+        private async Task<BaseResponse> EditExistInlineSelectionMenuInternal(
+            string chatId, string messageId, CreateInlineKeyboardRequest keyboardRequest)
+        {
+            var response = new BaseResponse();
+
+            try
+            {
+                var body = keyboardRequest == null
+                    ? new DeleteInlineMenuRequest
+                    {
+                        ChatId = chatId,
+                        MessageId = messageId,
+                    }
+                    : new EditInlineMenuRequest
+                    {
+                        ChatId = chatId,
+                        MessageId = messageId,
+                        InlineKeyboardRequest = keyboardRequest,
+                    };
+                
+                var url = $"{Url}/editMessageReplyMarkup";
+
+                await PostInternal(url, body, new Dictionary<string, string>());
+
+                return response;
+            }
+            catch (Exception exp)
+            {
+                Logger?.Warn($"Error sending inline selection menu : {exp}.");
                 return new BaseResponse
                 {
                     ErrorText = exp.Message,
