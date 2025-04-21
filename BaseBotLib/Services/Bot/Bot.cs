@@ -131,9 +131,14 @@ namespace BaseBotLib.Services.Bot
             return result;
         }
 
-        public async Task<BaseResponse> SendMessage(string chatId, string text)
+        public async Task<SendMessageBaseResponse> SendMessage(string chatId, string text)
         {
             return await SendMessageInternal(chatId, text);
+        }
+
+        public async Task<BaseResponse> EditMessage(string chatId, string messageId, string text)
+        {
+            return await EditMessageInternal(chatId, messageId, text);
         }
 
         public async Task<BaseResponse> DeleteMessage(string chatId, string messageId)
@@ -161,11 +166,11 @@ namespace BaseBotLib.Services.Bot
             return EditExistInlineSelectionMenuInternal(chatId, messageId, keyboardRequest: null);
         }
 
-        public async Task<BaseResponse> SendMessageWithMarkdown(string chatId, string text)
+        public async Task<SendMessageBaseResponse> SendMessageWithMarkdown(string chatId, string text)
         {
             return await SendMessageInternal(chatId, text, ParseModeMarkdownV2);
         }
-        public async Task<BaseResponse> SendMessageWithHtml(string chatId, string text)
+        public async Task<SendMessageBaseResponse> SendMessageWithHtml(string chatId, string text)
         {
             return await SendMessageInternal(chatId, text, ParseModeHTML);
         }
@@ -188,8 +193,34 @@ namespace BaseBotLib.Services.Bot
 
             return new BaseResponse();
         }
+        
+        private async Task<BaseResponse> EditMessageInternal(string chatId, string messageId, string text)
+        {
+            try
+            {
+                var url = $"{Url}/editMessageText";
+
+                var body = new EditMessageTextRequest
+                {
+                    ChatId = chatId,
+                    ExistMessageId = messageId,
+                    Text = text,
+                };
+                await PostInternal(url, body, new Dictionary<string, string>());
+            }
+            catch (Exception exp)
+            {
+                Logger?.Warn($"Error editing message : {exp}.");
+                return new BaseResponse
+                {
+                    ErrorText = exp.Message,
+                };
+            }
+
+            return new BaseResponse();
+        }
     
-        private async Task<BaseResponse> SendMessageInternal(string chatId, string text, string parseMode = null)
+        private async Task<SendMessageBaseResponse> SendMessageInternal(string chatId, string text, string parseMode = null)
         {
             try
             {
@@ -207,18 +238,24 @@ namespace BaseBotLib.Services.Bot
                         Text = text,
                         ParseMode = parseMode,
                     };
-                await PostInternal(url, body, new Dictionary<string, string>());
+                var response = await PostInternalWithResponse<SendMessageRequest, SendMessageResponse>(
+                    url, body, new Dictionary<string, string>());
+                
+                return new SendMessageBaseResponse
+                {
+                    Success = response.Result != null,
+                    ErrorText = response?.ErrorDescription,
+                    MessageId = response?.Result?.MessageId,
+                };
             }
             catch (Exception exp)
             {
                 Logger?.Warn($"Error sending message : {exp}.");
-                return new BaseResponse
+                return new SendMessageBaseResponse
                 {
                     ErrorText = exp.Message,
                 };
             }
-
-            return new BaseResponse();
         }
     
         private static string ParseModeMarkdownV2 = "MarkdownV2";
@@ -298,7 +335,6 @@ namespace BaseBotLib.Services.Bot
                 var url = $"{Url}/sendMessage";
 
                 await PostInternal(url, body, new Dictionary<string, string>());
-                
                 
                 return response;
             }
@@ -676,6 +712,7 @@ namespace BaseBotLib.Services.Bot
                 }
             }
         }
+        
         private async Task PostInternal<T>(string url, T body, Dictionary<string, string> headers)
         {
             var bodyString = JsonConvert.SerializeObject(body);
@@ -702,6 +739,38 @@ namespace BaseBotLib.Services.Bot
                 }
             }
         }
+        
+        
+        private async Task<TRes> PostInternalWithResponse<TReq, TRes>(string url, TReq body, Dictionary<string, string> headers)
+        {
+            var bodyString = JsonConvert.SerializeObject(body);
+            var content = new StringContent(bodyString);
+
+            if (headers != null)
+            {
+                foreach (var header in headers)
+                {
+                    content.Headers.Add(header.Key, header.Value);
+                }
+            }
+
+            content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
+
+            using (var httpClient = new HttpClient())
+            {
+                var response = await httpClient.PostAsync(url, content);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    throw new Exception(
+                        $"Error executing request. {response.StatusCode} {await response.Content.ReadAsStringAsync()}.");
+                }
+                
+                var str = await response.Content.ReadAsStringAsync();
+                return JsonConvert.DeserializeObject<TRes>(str);
+            }
+        }
+        
         private static async Task<T> GetInternal<T>(string url, Dictionary<string, string> headers = null)
         {
             var request = new HttpRequestMessage(HttpMethod.Get, url);
