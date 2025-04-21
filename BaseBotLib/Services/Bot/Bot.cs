@@ -175,6 +175,68 @@ namespace BaseBotLib.Services.Bot
             return await SendMessageInternal(chatId, text, ParseModeHTML);
         }
         
+        /// <summary>
+        /// 10 MB max size for photos, 50 MB for other files.
+        /// </summary>
+        /// <param name="chatId"></param>
+        /// <param name="fileName"></param>
+        /// <param name="body"></param>
+        /// <returns></returns>
+        public async Task<SendFileBaseResponse> SendPhoto(string chatId, string fileName, byte[] body)
+        {
+            try
+            {
+                var url = $"{Url}/sendPhoto?chat_id={chatId}";
+                var response = await PostInternalMultiFormData<SendAnyDocumentResponse>(url, "photo", fileName, body);
+                var fileId = response?.Result?.Photos?.FirstOrDefault()?.FileId;
+                
+                return new SendFileBaseResponse
+                {
+                    FileId = fileId,
+                };
+            }
+            catch (Exception exp)
+            {
+                Logger?.Warn($"Error sending photo to client : {chatId} : {exp}.");
+                return new SendFileBaseResponse
+                {
+                    ErrorText = exp.Message,
+                    Success = false,
+                };
+            }
+        }
+        
+        /// <summary>
+        /// 10 MB max size for photos, 50 MB for other files.
+        /// </summary>
+        /// <param name="chatId"></param>
+        /// <param name="fileName"></param>
+        /// <param name="body"></param>
+        /// <returns></returns>
+        public async Task<SendFileBaseResponse> SendFile(string chatId, string fileName, byte[] body)
+        {
+            try
+            {
+                var url = $"{Url}/sendDocument?chat_id={chatId}";
+                var response = await PostInternalMultiFormData<SendAnyDocumentResponse>(url, "document", fileName, body);
+                var fileId = response?.Result?.DocumentData?.FileId;
+                
+                return new SendFileBaseResponse
+                {
+                    FileId = fileId,
+                };
+            }
+            catch (Exception exp)
+            {
+                Logger?.Warn($"Error sending photo to client : {chatId} : {exp}.");
+                return new SendFileBaseResponse
+                {
+                    ErrorText = exp.Message,
+                    Success = false,
+                };
+            }
+        }
+        
         private async Task<BaseResponse> DeleteMessageInternal(string chatId, string messageId)
         {
             try
@@ -740,7 +802,6 @@ namespace BaseBotLib.Services.Bot
             }
         }
         
-        
         private async Task<TRes> PostInternalWithResponse<TReq, TRes>(string url, TReq body, Dictionary<string, string> headers)
         {
             var bodyString = JsonConvert.SerializeObject(body);
@@ -796,6 +857,34 @@ namespace BaseBotLib.Services.Bot
                 return JsonConvert.DeserializeObject<T>(str);
             }
         }
+        
+
+        private static async Task<T> PostInternalMultiFormData<T>(string url, string type, string fileName, byte[] bytes)
+        {
+            using (var multipart = new MultipartFormDataContent())
+            {
+                using (var fileContent = new ByteArrayContent(bytes))
+                {
+                    fileContent.Headers.ContentType = MediaTypeHeaderValue.Parse("multipart/form-data");
+                    multipart.Add(fileContent, name: type, fileName : fileName);
+                
+                    using (var httpClient = new HttpClient())
+                    {
+                        var response = await httpClient.PostAsync(url, multipart);
+                        var responseString = await response.Content.ReadAsStringAsync();
+
+                        if (!response.IsSuccessStatusCode)
+                        {
+                            throw new Exception(
+                                $"Error executing request. {response.StatusCode} {responseString}.");
+                        }
+
+                        return JsonConvert.DeserializeObject<T>(responseString);
+                    }
+                }
+            }
+        }
+        
         private Message ConvertToMessage(ResultInfo messageData)
         {
             if (messageData == null)
