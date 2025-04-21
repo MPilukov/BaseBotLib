@@ -9,10 +9,29 @@ namespace BaseBotLib.Interfaces.Bot
         Task<string> GetBotName();
         Task<string> GetBotUserName();
         Task<Message[]> GetNewMessages();
-        Task<BaseResponse> SendMessage(string chatId, string text);
+        Task<SendMessageBaseResponse> SendMessage(string chatId, string text);
+        
+        /// <summary>
+        /// 10 MB max size for photos, 50 MB for other files.
+        /// </summary>
+        /// <param name="chatId"></param>
+        /// <param name="fileName"></param>
+        /// <param name="body"></param>
+        /// <returns></returns>
+        Task<SendFileBaseResponse> SendPhoto(string chatId, string fileName, byte[] body);
+
+        /// <summary>
+        /// 10 MB max size for photos, 50 MB for other files.
+        /// </summary>
+        /// <param name="chatId"></param>
+        /// <param name="fileName"></param>
+        /// <param name="body"></param>
+        /// <returns></returns>
+        Task<SendFileBaseResponse> SendFile(string chatId, string fileName, byte[] body);
+        Task<BaseResponse> EditMessage(string chatId, string messageId, string text);
         Task<BaseResponse> DeleteMessage(string chatId, string messageId);
-        Task<BaseResponse> SendMessageWithMarkdown(string chatId, string text);
-        Task<BaseResponse> SendMessageWithHtml(string chatId, string text);
+        Task<SendMessageBaseResponse> SendMessageWithMarkdown(string chatId, string text);
+        Task<SendMessageBaseResponse> SendMessageWithHtml(string chatId, string text);
         
         // todo: send file/photo
         Task<BaseResponse> SendSelectionMenu(string chatId, SelectionMenu menu);
