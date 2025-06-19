@@ -151,7 +151,7 @@ namespace BaseBotLib.Services.Bot
             return SendSelectionMenuInternal(chatId, menu);
         }
 
-        public Task<BaseResponse> SendInlineSelectionMenu(string chatId, InlineSelectionMenu menu)
+        public Task<SendMessageBaseResponse> SendInlineSelectionMenu(string chatId, InlineSelectionMenu menu)
         {
             return SendInlineSelectionMenuInternal(chatId, menu);
         }
@@ -481,9 +481,9 @@ namespace BaseBotLib.Services.Bot
             }
         }
 
-        private async Task<BaseResponse> SendInlineSelectionMenuInternal(string chatId, InlineSelectionMenu menu)
+        private async Task<SendMessageBaseResponse> SendInlineSelectionMenuInternal(string chatId, InlineSelectionMenu menu)
         {
-            var response = new BaseResponse();
+            var response = new SendMessageBaseResponse();
 
             try
             {
@@ -507,15 +507,22 @@ namespace BaseBotLib.Services.Bot
                 };
                 
                 var url = $"{Url}/sendMessage";
+                
+                var sendMessageResponse = await PostInternalWithResponse<InlineSelectionMenuRequest, SendMessageResponse>(
+                    url, body, new Dictionary<string, string>());
+                // await PostInternal(url, body, new Dictionary<string, string>());
 
-                await PostInternal(url, body, new Dictionary<string, string>());
-
-                return response;
+                return new SendMessageBaseResponse
+                {
+                    Success = sendMessageResponse.Result != null,
+                    ErrorText = sendMessageResponse?.ErrorDescription,
+                    MessageId = sendMessageResponse?.Result?.MessageId,
+                };
             }
             catch (Exception exp)
             {
                 Logger?.Warn($"Error sending inline selection menu : {exp}.");
-                return new BaseResponse
+                return new SendMessageBaseResponse
                 {
                     ErrorText = exp.Message,
                 };

@@ -35,7 +35,7 @@ namespace BaseBotLib.Interfaces.Bot
         
         // todo: send file/photo
         Task<BaseResponse> SendSelectionMenu(string chatId, SelectionMenu menu);
-        Task<BaseResponse> SendInlineSelectionMenu(string chatId, InlineSelectionMenu menu);
+        Task<SendMessageBaseResponse> SendInlineSelectionMenu(string chatId, InlineSelectionMenu menu);
         Task<BaseResponse> EditInlineSelectionMenu(string chatId, string messageId, InlineSelectionMenu menu);
         Task<byte[]> GetFile(string fileId);
         
