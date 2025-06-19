@@ -424,7 +424,7 @@ namespace BaseBotLib.Services.Bot
                     };
                 }
 
-                var buttons = GetInlineButtons(menu.Buttons);
+                var buttons = GetInlineButtons(menu.Buttons, menu.ButtonsPerRow);
                 
                 var createKeyboardRequest = new CreateInlineKeyboardRequest
                 {
@@ -492,7 +492,7 @@ namespace BaseBotLib.Services.Bot
                     return response;
                 }
 
-                var buttons = GetInlineButtons(menu.Buttons);
+                var buttons = GetInlineButtons(menu.Buttons, menu.ButtonsPerRow);
                 
                 var body = new InlineSelectionMenuRequest
                 {
@@ -560,7 +560,7 @@ namespace BaseBotLib.Services.Bot
             return response.ToArray();
         }
 
-        private static InlineButton[][] GetInlineButtons(IReadOnlyList<InlineSelectionMenuButton> buttons)
+        private static InlineButton[][] GetInlineButtonsWithTwoColumn(IReadOnlyList<InlineSelectionMenuButton> buttons)
         {
             var response = new List<InlineButton[]>();
 
@@ -599,6 +599,36 @@ namespace BaseBotLib.Services.Bot
 
                     count += 2;
                 }
+            }
+
+            return response.ToArray();
+        }
+
+        private static InlineButton[][] GetInlineButtons(IReadOnlyList<InlineSelectionMenuButton> buttons, int buttonsPerRow)
+        {
+            var response = new List<InlineButton[]>();
+
+            var count = 0;
+            while (count < buttons.Count)
+            {
+                // Вычисляем, сколько кнопок можно добавить в текущую строку
+                var remaining = buttons.Count - count;
+                var currentRowCount = Math.Min(buttonsPerRow, remaining);
+
+                var row = new InlineButton[currentRowCount];
+
+                for (var i = 0; i < currentRowCount; i++)
+                {
+                    row[i] = new InlineButton
+                    {
+                        Text = buttons[count + i].Text,
+                        CallbackData = buttons[count + i].CallbackData,
+                        Url = buttons[count + i].Url
+                    };
+                }
+
+                response.Add(row);
+                count += currentRowCount;
             }
 
             return response.ToArray();
